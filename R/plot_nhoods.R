@@ -188,7 +188,7 @@ plotNhoodMappings <- function(r_milo, m_milo, df_sim, dimred="UMAP", colour_by,
 
 
   # Add similarities lines
-  p <- p + geom_line(data=df_lines,aes(x=x,y=y, group=alignment,colour=sim),alpha=line_alpha) +
+  p <- p + ggrastr::rasterise(geom_line(data=df_lines,aes(x=x,y=y, group=alignment,colour=sim),alpha=line_alpha),dpi=300) +
     scale_color_distiller(name = legend_title, palette = "Spectral",
 			  limits=c(min(df_sim$sim),max(df_sim$sim)))
 
