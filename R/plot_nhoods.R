@@ -126,8 +126,8 @@ plotNhoodMappings <- function(r_milo, m_milo, df_sim, dimred="UMAP", colour_by,
   if(is.null(m_graph)) { m_graph <- miloR::nhoodGraph(m_milo) }
 
   # Get nhood embedding positions
-  r_nhoodPos <- getNhoodPositions(r_milo, r_graph)
-  m_nhoodPos <- getNhoodPositions(m_milo, m_graph)
+  r_nhoodPos <- getNhoodPositions(r_milo, r_graph, dimred = dimred)
+  m_nhoodPos <- getNhoodPositions(m_milo, m_graph, dimred = dimred)
 
   # TODO: Fix this
   if(!is.null(rotate)) {
