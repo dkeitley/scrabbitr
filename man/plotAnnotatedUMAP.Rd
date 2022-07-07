@@ -12,7 +12,9 @@ plotAnnotatedUMAP(
   ncell_filt = 5,
   size = 1,
   label_force = 15,
-  palette = scrabbitr::celltype_colours
+  text_size = 2,
+  line_size = 0.5,
+  palette = NULL
 )
 }
 \description{

@@ -43,7 +43,7 @@ selectNhoodFeatures <- function(milo, hvg_selection="scran", max_hvgs=2000,
   if(!is.null(hvg_block)) {
     hvg_block <- colData(milo, hvg_block)
   }
-  
+
   if(!is.null(exclude_genes)) {
     milo <- milo[!(rownames(milo) %in% exclude_genes), ]
   }
@@ -68,11 +68,98 @@ exportNhoodSim <- function(export_dir, r_vals, m_vals, nhood_sim) {
 }
 
 
-#' @examples
-#' calNhoodSim(r_milo, m_milo, rm_orthologs, hvg_block="sample")
+#' Compare neighbourhoods across species
+#'
+#' Runs the neighbourhood comparison pipeline
+#'
+#' @param r_milo The rabbit \linkS4class{Milo} object
+#' @param m_milo The mouse \linkS4class{Milo} object
+#' @param orthologs A \linkS4class{DataFrame} of rabbit and mouse one-to-one orthologs.
+#' @param sim_preprocessing Used to specify whether to compute the gene specificity
+#'  before computing similiarities between neighbourhoods. Can be either
+#'  \code{"gene_spec"} or \code{"none"}.
+#' @param sim_measure The similarity measure to compare neighbourhoods. Can be
+#' one of \code{"pearson"}, \code{"kendall"} or \code{"spearman"}.
+#' @param hvg_join_type Specifies how to combine gene features from the two species. Can
+#' be either \code{"intersection"} or \code{"union"}.
+#' @param r_exclude A vector of rabbit genes to exclude from feature selection.
+#' @param m_exclude A vector of mouse genes to exclude from feature selection.
+#' @param export_dir A string path indicating where to export output files.
+#' @param verbose A logical scalar indicating whether progress updates should
+#' be printed to screen.
+#' @param ... Additional arguments to pass to specific methods.
+#' See \code{?selectNhoodFeatures}.
+#'
+#' @return
+#' A named list is returned containing:
+#' \describe{
+#' \item{\code{r_vals}: }{A \linkS4class{DataFrame} of mean expression values (or gene specificity values) for each
+#' rabbit gene across all rabbit neighbourhoods.}
+#' \item{\code{m_vals}: }{A \linkS4class{DataFrame} of mean expression values (or gene specificity values) for each
+#' mouse gene across all mouse neighbourhoods.}
+#' \item{\code{nhood_sim}: }{An all vs all matrix of similarities between rabbit (rows) and mouse (columns) neighbourhoods.}
+#' }
+#'
+#' @details
+#' This function implements the neighbourhood comparison pipeline described in
+#' Ton et al. (2022).
+#'
+#' The pipeline consists of two main steps - selecting features and computing neighbourhood
+#' similarities.
+#'
+#'
+#' \strong{Feature selection}
+#'
+#' Fistly, to remove uninformative genes from driving similarities between species,
+#' a subset of genes are chosen independently for each species by calling \code{selectNhoodFeatures}.
+#' By default this uses \code{scran::getScranHVGs}, however, it's also possible to
+#' specify a set of predefined features by passing a list of genes to the \code{hvg_selection} argument.
+#'
+#' These genes are then filtered to exclude genes that are listed in \code{r_exclude} and \code{m_exclude}.
+#' Only genes that are one-to-one orthologs, as specified in \code{orthologs} are retained.
+#'
+#' The features from each species are then combined according to \code{hvg_join_type}. This provides a
+#' common gene set with which to compute similarities between neighbourhoods.
+#'
+#'
+#' \strong{Computing neighbourhood similarities}
+#'
+#' Using these selected features, a mean expression profile is then computed for each neighbourhood
+#' using \code{calcNhoodMean}. These expression values are extracted using the \code{logcounts} assay
+#' of the rabbit and mouse \linkS4class{Milo} object which must represent normalised logcounts.
+#'
+#' Prior to computing the similarity between neighbourhoods an additional normalisation
+#' step can be performed using the \code{sim_preprocessing = "gene_spec"} parameter option.
+#' Specifically, the gene specificity (\eqn{s^i_g}{s^i_g}) is computed for each neighbourhood, given by
+#' \deqn{s^i_g = \frac{g_i}{\frac{1}{N} \sum_{k=1}^N g_k}}{s^i_g = N*g_i / (g_1 + g_2 + ... + g_N)}
+#' where \eqn{g_x} represents the mean expression of gene \eqn{g} in neighbourhood \eqn{x \in {1 \hdots N}}{x = 1,...,N}.
+#' This can be used to account for differences in absolute values between datasets.
+#'
+#' Following this, the similarity between neighbourhoods is computed using the correlation
+#' measure specified by \code{sim_measure}.
+#'
+#' The matrix of rabbit vs mouse neighbourhood similarity scores, as well as mean expression
+#' values (or gene specificity values if \code{sim_preprocessing = "gene_spcec"}) are exported
+#' to the directory specified by \code{export_dir}.
+#'
+#'
+#' @author Daniel Keitley
+#'
+#'
+#' @references
+#' Ton M.L, Keitley D et al. 2022
+#' Rabbit Development as a Model for Single Cell Comparative Genomics
+#' \emph{Manuscript in submission}.
+#'
+#' @seealso \code{\link{selectNhoodFeatures}}, \code{\link{calcNhoodMean}},
+#' \code{\link{calcGeneSpec}} and \code{\link{exportNhoodSim}} for more info on
+#' specific steps of the pipeline.
+#'
+#' See an example usage \href{https://github.com/MarioniLab/RabbitGastrulation2022/blob/master/notebooks/compare_nhoods.ipynb}{here}.
+#'
 #' @importFrom igraph vertex_attr
 #' @export
-calcNhoodSim <- function(r_milo, m_milo, orthologs, assay="logcounts",
+calcNhoodSim <- function(r_milo, m_milo, orthologs,
                          sim_preprocessing="gene_spec", sim_measure="pearson",
                          hvg_join_type="intersection", r_exclude = NULL, m_exclude = NULL,
 			 export_dir=NULL, verbose=TRUE,
@@ -170,7 +257,7 @@ subsetMiloGraph <- function(r_milo, r_graph) {
 
   # Filter original SingleCellExperiment
   r_milo <- r_milo[,rhood_cells]
-  
+
   miloR::nhoodGraph(r_milo) <- r_graph
 
   return(r_milo)
@@ -246,10 +333,10 @@ getMaxMappings <- function(nhood_sim, nhood_axis, long_format=FALSE,
 
   dt <- as.data.table(nhood_sim)
   colnames(dt) <- col.names
-  
+
   dt_key <- colnames(dt)[nhood_axis]
   max_dt <- dt[, .SD[which.max(get(col.names[3]))], by=dt_key]
-  
+
   return(max_dt)
 }
 
