@@ -49,7 +49,7 @@ plotPseudocells <- function(sce, pseudo_embed, dimred="UMAP",
 #' @export
 plotAnnotationAlluvium <- function(sce, old, new, ncell_thresh=10,
                                    repel_labels=TRUE, stratum_labels=FALSE,
-                                   nudge=0.2) {
+                                   nudge=0.2, palette = getCelltypeColours()) {
 
   df_frac <- aggregate(x = colnames(sce), by = list(sce[[old]],sce[[new]]),
                        FUN = length)
@@ -61,8 +61,7 @@ plotAnnotationAlluvium <- function(sce, old, new, ncell_thresh=10,
   # Filter entries according to the number of cells
   df_frac <- df_frac[df_frac$num_cells > ncell_thresh,]
 
-  cols <- getCelltypeColours()
-  names(cols) <- paste0("pred_",names(cols))
+  names(palette) <- paste0("pred_",names(palette))
 
 
   p <- ggplot(df_frac,aes(axis1 = original, axis2 = predicted, y=num_cells, fill=predicted, label=predicted)) +
@@ -102,7 +101,7 @@ plotAnnotationAlluvium <- function(sce, old, new, ncell_thresh=10,
       panel.background = element_blank(),
       text = element_text(size=20)
     ) +
-    scale_fill_manual(values=cols) +
+    scale_fill_manual(values=palette) +
     theme(legend.position = "none")
 
   return(p)
@@ -260,7 +259,25 @@ plotAnnotatedUMAP <- function(sce, colour_by="predicted_celltype", ncell_filt=5,
 
 }
 
+#' @importFrom viridis scale_colour_viridis
+#' @export
+plotGeneUMAP <- function(sce, gene, point_shape=16, point_size=1, opacity=0.8,
+                         rasterise = TRUE) {
+  p <- ggcells(sce, aes_string(x="UMAP.1",y="UMAP.2",colour=gene))
 
+  if(rasterise) p <- p + ggrastr::geom_point_rast(size=point_size, alpha=opacity,
+                                                  shape=point_shape)
+  else p <- p + geom_point(size=point_size,alpha=opacity,shape=point_shape)
 
+  p <- p + scale_colour_viridis(direction=-1, name = gene) +
+    xlab("UMAP1") + ylab("UMAP2") +
+    theme_linedraw() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.text = element_blank(),
+          axis.ticks=element_blank(),
+          aspect.ratio=1)
+
+  return(p)
+}
 
 
