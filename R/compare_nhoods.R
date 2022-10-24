@@ -37,9 +37,6 @@ getScranHVGs <- function(sce, n_hvgs, block=NULL) {
 selectNhoodFeatures <- function(milo, hvg_selection="scran", max_hvgs=2000,
                                 hvg_block=NULL, exclude_genes = NULL) {
 
-  # If hvgs already provided
-  if(length(hvg_selection)>1) return(hvg_selection)
-
   if(!is.null(hvg_block)) {
     hvg_block <- colData(milo, hvg_block)
   }
@@ -159,7 +156,7 @@ exportNhoodSim <- function(export_dir, r_vals, m_vals, nhood_sim) {
 #'
 #' @importFrom igraph vertex_attr
 #' @export
-calcNhoodSim <- function(r_milo, m_milo, orthologs,
+calcNhoodSim <- function(r_milo, m_milo, orthologs, sim_features = NULL,
                          sim_preprocessing="gene_spec", sim_measure="pearson",
                          hvg_join_type="intersection", r_exclude = NULL, m_exclude = NULL,
 			 export_dir=NULL, verbose=TRUE,
@@ -172,21 +169,24 @@ calcNhoodSim <- function(r_milo, m_milo, orthologs,
 
 
   # Select features
-  if(verbose) message("Selecting features...")
-  r_features <- selectNhoodFeatures(r_milo, exclude_genes = r_exclude, ...)
-  m_features <- selectNhoodFeatures(m_milo, exclude_genes = m_exclude, ...)
+  if(is.null(sim_features)) {
+
+    if(verbose) message("Selecting features...")
+    r_features <- selectNhoodFeatures(r_milo, exclude_genes = r_exclude, ...)
+    m_features <- selectNhoodFeatures(m_milo, exclude_genes = m_exclude, ...)
 
 
-  # Combine features
-  if(verbose) message("Combining features...")
-  if(hvg_join_type == "union") {
-    sim_features <- orthologs[orthologs[,1] %in% r_features |
-                                orthologs[,2] %in% m_features, ]
-  } else if(hvg_join_type == "intersection") {
-    sim_features <- orthologs[orthologs[,1] %in% r_features &
-                                orthologs[,2] %in% m_features, ]
-  } else {
-    stop("Invalid hvg_join_type. Please specify either 'union' or 'intersection'.")
+    # Combine features
+    if(verbose) message("Combining features...")
+    if(hvg_join_type == "union") {
+      sim_features <- orthologs[orthologs[,1] %in% r_features |
+                                  orthologs[,2] %in% m_features, ]
+    } else if(hvg_join_type == "intersection") {
+      sim_features <- orthologs[orthologs[,1] %in% r_features &
+                                  orthologs[,2] %in% m_features, ]
+    } else {
+      stop("Invalid hvg_join_type. Please specify either 'union' or 'intersection'.")
+    }
   }
 
 
