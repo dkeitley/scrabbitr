@@ -119,7 +119,9 @@ celltype_colours <- c(
                       'Trophoblast'= '#989898',
                       'Cytotrophoblast'= '#46c5bf',
                       'Syncytiotrophoblast progenitors'= '#7766db',
-                      "Syncytiotrophoblast" = '#7295e2'
+                      "Syncytiotrophoblast" = '#7295e2',
+                      'SCT progenitors' = '#7766db',
+                      'Early SCT' = '#7295e2'
 )
 
 
