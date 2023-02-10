@@ -8,6 +8,8 @@ An R package containing utility functions used as part of the Ton et al. 2022<su
 >
 > Mai-Linh Ton<sup>1,2,\*</sup> Daniel Keitley<sup>3,*</sup>, Bart Theeuwes<sup>2</sup>, Carolina Guibentif<sup>4</sup>, Jonas Ahnfelt-Rønne<sup>5</sup>, Thomas Kjærgaard Andreassen<sup>5</sup>, Fernando J. Calero-Nieto<sup>2</sup>, Ivan Imaz-Rosshandler<sup>6</sup>, Blanca Pijuan-Sala<sup>7</sup>, Jennifer Nichols<sup>2</sup>, Èlia Benito-Gutiérrez<sup>3</sup>, John Marioni<sup>7,8,9</sup>, Berthold Göttgens<sup>1,2</sup>
 
+> doi: [https://doi.org/10.1101/2022.10.06.510971](https://doi.org/10.1101/2022.10.06.510971)
+
 See project webpage [here](https://marionilab.github.io/RabbitGastrulation2022/) for more info. 
 
 
@@ -23,14 +25,12 @@ devtools::install_github("https://github.com/dkeitley/scrabbitr")
 
 
 ## Example usage
-Comparing neighbourhoods across rabbit and mouse - [link](https://github.com/MarioniLab/RabbitGastrulation2022/blob/master/notebooks/compare_nhoods.ipynb)
-
-Predicting cell types across species - [link](https://github.com/MarioniLab/RabbitGastrulation2022/blob/master/notebooks/predict_cell_types.ipynb)
+Comparing neighbourhoods across rabbit and mouse - [link](https://github.com/MarioniLab/RabbitGastrulation2022/blob/master/RNA/compare_nhoods/compare_nhoods.ipynb)
 
 
 
 ## Links
-[Project webpage](https://marionilab.github.io/RabbitGastrulation2022/)
-[Project github repository](https://github.com/MarioniLab/RabbitGastrulation2022)
-[scrabbitpy](https://github.com/dkeitley/scrabbitpy)
+[Project webpage](https://marionilab.github.io/RabbitGastrulation2022/) <br>
+[Project github repository](https://github.com/MarioniLab/RabbitGastrulation2022) <br>
+[scrabbitpy](https://github.com/dkeitley/scrabbitpy) <br>
 
